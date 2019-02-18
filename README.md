@@ -103,8 +103,10 @@ Master repository includes the following submodules:
   [texture loading library](https://github.com/DiligentGraphics/DiligentTools/tree/master/TextureLoader) and 
   [Render Script](https://github.com/DiligentGraphics/DiligentTools/tree/master/RenderScript), a Lua-based run-time 
   graphics resource managing system. Tools module depends on Core module.
+* [DiligentFX](https://github.com/DiligentGraphics/DiligentFX) is a high-level rendering framework that implements
+  various rendering components. The module depends on Core and Tools modules.
 * [Samples](https://github.com/DiligentGraphics/DiligentSamples) submodule contains several simple graphics applications 
-  intended to demonstrate the usage of the Diligent Engine API. The module depends on Core and Tools modules.
+  intended to demonstrate the usage of the Diligent Engine API. The module depends on Core, Tools and DiligentFX modules.
   
 
 <a name="build_and_run"></a>
@@ -277,6 +279,8 @@ you will need to set an appropriate development team in the project settings.
 <a name="build_and_run_integration"></a>
 ## Integrating Diligent Engine with Existing Build System
 
+### Your Project Uses Cmake
+
 If your project uses CMake, adding Diligent Engine requires just few lines of code. 
 Suppose that the directory structure looks like this:
 
@@ -322,33 +326,64 @@ Please also take a look at getting started tutorials for
 [Windows](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Tutorials/Tutorial00_HelloWin32) and 
 [Linux](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Tutorials/Tutorial00_HelloLinux).
 
-If your project does not use CMake, it is recommended to build libraries with cmake and add them to your build system.
+### Your Project Does Not Use Cmake
+
+If your project doesn't use CMake, it is recommended to build libraries with CMake and add them to your build system.
+For Windows platforms, you can download the latest build artifacts from [appveyor](https://ci.appveyor.com/project/DiligentGraphics/diligentcore).
+
+Global CMake installation directory is controlled by `CMAKE_INTALL_PREFIX` variable. Within that directory,
+`DILIGENT_CORE_INSTALL_DIR` defines the subdirectory where libraries and headers are installed.
+Note that [CMAKE_INTALL_PREFIX](https://cmake.org/cmake/help/v3.13/variable/CMAKE_INSTALL_PREFIX.html) defaults
+to `/usr/local` on UNIX and `c:/Program Files/${PROJECT_NAME}` on Windows, which may not be what you want.
+Use `-D CMAKE_INSTALL_PREFIX=install` to use local `install` folder instead:
+
+```
+cmake -H. -B./cmk_build/Win64 -D CMAKE_INSTALL_PREFIX=install -G "Visual Studio 15 2017 Win64"
+```
+
 To install libraries and header files, run the following CMake command from the build folder:
 
 ```cmake
 cmake --build . --target install
 ```
 
-Global cmake installation directory is controlled by `CMAKE_INTALL_PREFIX` variable. Within that directory,
-`DILIGENT_CORE_INSTALL_DIR` defines the subdirectory where libraries and headers will be installed.
+DiligentCore installation directory will contain everything required to integrate the engine:
 
-Alternatively you can generate build files (such as Visual Studio projects) and add them to your project.
-Build customization described below can help tweak the settings for your specific needs.
+* *headers* subdirectory will contain all required header files. Add this directory to your include search directories.
+* *lib* subdirectory will contain static libraries.
+* *bin* subdirectory will contain dynamic libraries.
+
+An easier way is to link with dynamic libraries. When linking statically, you will need to list DiligentCore as well 
+as all third-party libraries used by the engine. Besides that, you will also need to specify platform-specific system libraries. 
+For example, for Windows platform, the list of libraries your project will need to link against may look like this:
+
+```
+DiligentCore.lib glslang.lib HLSL.lib OGLCompiler.lib OSDependent.lib SPIRVCross.lib SPIRV.lib SPIRV-Tools-opt.lib SPIRV-Tools.lib glew-static.lib vulkan-1.lib dxgi.lib d3d11.lib d3d12.lib d3dcompiler.lib opengl32.lib
+```
+
+Vulkan libraries can be found in [DiligentCore/External/vulkan/libs](https://github.com/DiligentGraphics/DiligentCore/tree/master/External/vulkan/libs) directory.
+
+Diligent Engine headers require one of the following platform macros to be defined as `1`:
+`PLATFORM_WIN32`, `PLATFORM_UNIVERSAL_WINDOWS`, `PLATFORM_ANDROID`, `PLATFORM_LINUX`, `PLATFORM_MACOS`, `PLATFORM_IOS`.
+
+Another way to intergrate the engine is to generate build files (such as Visual Studio projects) and add them to your
+build system. Build customization described below can help tweak the settings for your specific needs.
 
 
 <a name="build_option"></a>
 ## Build Options
 
 By default, all back-ends available on current platform are built. To disable specific back-ends,
-use the following options: `NO_DIRECT3D11`, `NO_DIRECT3D12`, `NO_OPENGL`, `NO_VULKAN`, `NO_METAL`.
+use the following options: `DILIGENT_NO_DIRECT3D11`, `DILIGENT_NO_DIRECT3D12`, `DILIGENT_NO_OPENGL`,
+`DILIGENT_NO_VULKAN`, `DILIGENT_NO_METAL`.
 The options can be set through cmake UI or from the command line as in the example below:
 
 ```
-cmake -D NO_DIRECT3D11=TRUE -H. -B./cmk_build/Win64 -G "Visual Studio 15 2017 Win64"
+cmake -D DILIGENT_NO_DIRECT3D11=TRUE -H. -B./cmk_build/Win64 -G "Visual Studio 15 2017 Win64"
 ```
 
 By default Vulkan back-end is linked with glslang that enables compiling HLSL and GLSL shaders to SPIRV at run time.
-If run-time compilation is not required, glslang can be disabled with `NO_GLSLANG` cmake option. This will significantly 
+If run-time compilation is not required, glslang can be disabled with `DILIGENT_NO_GLSLANG` cmake option. This will significantly 
 reduce the size of the Vulkan back-end binary.
 
 
@@ -483,7 +518,7 @@ Please refer to [this page](https://github.com/DiligentGraphics/DiligentCore#api
 | Sample     | Screenshot  | Description          |
 |------------|-------------|----------------------|
 | [AntTweakBar Sample](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Samples/AntTweakBar) | ![](https://github.com/DiligentGraphics/DiligentSamples/blob/master/Samples/AntTweakBar/Screenshot.png) | This sample demonstrates how to use [AntTweakBar library](http://anttweakbar.sourceforge.net/doc) to create simple user interface. |
-| [Atmosphere Sample](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Samples/Atmosphere) | ![](https://github.com/DiligentGraphics/DiligentSamples/blob/master/Samples/Atmosphere/Screenshot.png) | The sample implements physically-based atmospheric light scattering model and demonstrates how Diligent Engine can be used to accomplish various rendering tasks: loading textures from files, using complex shaders, rendering to textures, using compute shaders and unordered access views, etc. |
+| [Atmosphere Sample](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Samples/Atmosphere) | ![](https://github.com/DiligentGraphics/DiligentSamples/blob/master/Samples/Atmosphere/Screenshot.png) | This sample demonstrates how to integrate [Epipolar Light Scattering](https://github.com/DiligentGraphics/DiligentFX/tree/master/Postprocess/EpipolarLightScattering) post-processing effect into an application to render physically-based atmosphere. |
 
 
 <a name="demos"></a>
