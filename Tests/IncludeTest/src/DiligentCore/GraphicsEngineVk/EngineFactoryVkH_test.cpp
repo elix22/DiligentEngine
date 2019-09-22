@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,4 +21,15 @@
  *  of the possibility of such damages.
  */
 
-#include "DiligentCore/Graphics/GraphicsTools/include/BasicShaderSourceStreamFactory.h"
+#if PLATFORM_WIN32
+#   ifndef NOMINMAX
+#       define NOMINMAX
+#   endif
+#   include <Windows.h>
+#endif
+
+#ifndef ENGINE_DLL 
+#   define ENGINE_DLL 1
+#endif
+
+#include "DiligentCore/Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"

@@ -59,8 +59,9 @@ install:
   - appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
   - 7z x cmake.zip -oC:\projects\deps > nul
   - move C:\projects\deps\cmake-* C:\projects\deps\cmake # Move to a version-agnostic directory
-  - set PATH=C:\projects\deps\cmake\bin;%PATH%
+  - set PATH=C:\projects\deps\cmake\bin;C:\Python37;%PATH%
   - cmake --version
+  - python --version
   - echo %PLATFORM%
   - if "%PLATFORM%"=="x64" ( set generator="Visual Studio 15 2017 Win64" ) else ( set generator="Visual Studio 15 2017" )
   
@@ -68,7 +69,7 @@ before_build:
   - cd c:\projects\diligentengine
   - echo %generator%
   - echo %cmake_args%
-  - cmake -D ENABLE_TESTS=TRUE %cmake_args% -H. -B./cmk_build -G %generator%
+  - cmake -D DILIGENT_ENABLE_TESTS=TRUE %cmake_args% -H. -B./cmk_build -G %generator%
 
 build:
   project: c:\projects\diligentengine\cmk_build\DiligentEngine.sln

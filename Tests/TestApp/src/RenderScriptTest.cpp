@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -412,13 +412,13 @@ RenderScriptTest::RenderScriptTest( IRenderDevice *pRenderDevice, IDeviceContext
         pScript->Run( "TestBufferViewArg", pBuffUAV );
     }
 
-    {
-        RefCntAutoPtr<IShaderVariable> pShaderVar;
-        pScript->GetShaderVariableByName( "svTestBlock", &pShaderVar );
-        assert( pShaderVar );
+    //{
+    //    RefCntAutoPtr<IShaderResourceVariable> pShaderVar;
+    //    pScript->GetShaderVariableByName( "svTestBlock", &pShaderVar );
+    //    assert( pShaderVar );
 
-        pScript->SetGlobalVariable( "svTestBlock", pShaderVar );
-        pScript->Run( "TestShaderVariable", pShaderVar );
-    }
+    //    pScript->SetGlobalVariable( "svTestBlock", pShaderVar );
+    //    pScript->Run( "TestShaderVariable", pShaderVar );
+    //}
     SetStatus(TestResult::Succeeded);
 }

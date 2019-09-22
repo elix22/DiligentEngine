@@ -1,5 +1,12 @@
 cmake_minimum_required (VERSION 3.6)
 
+if(PLATFORM_ANDROID)
+    add_subdirectory(Android)
+elseif(PLATFORM_LINUX)
+    add_subdirectory(Linux)
+endif()
+
+
 project(NativeAppBase)
 
 if(PLATFORM_WIN32)
@@ -13,7 +20,7 @@ if(PLATFORM_WIN32)
 
     function(add_win32_app TARGET_NAME SOURCE INCLUDE ASSETS)
         add_executable(${TARGET_NAME} WIN32 ${SOURCE} ${INCLUDE} ${ASSETS})
-        
+
         if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
             # libmingw32 must be included BEFORE NativeAppBase that contains the definition of WinMain.
             # otherwise WinMain will be stripped out of NativeAppBase and will be unresolved.
@@ -92,7 +99,13 @@ elseif(PLATFORM_ANDROID)
         target_link_libraries(${TARGET_NAME} 
         PRIVATE 
             android
-            NativeAppGlue
+            native_app_glue
+        )
+        # Export ANativeActivity_onCreate(),
+        # Refer to: https://github.com/android-ndk/ndk/issues/381.
+        set_target_properties(${TARGET_NAME}
+        PROPERTIES
+          LINK_FLAGS "-u ANativeActivity_onCreate"
         )
         #target_include_directories(${TARGET_NAME} 
         #PRIVATE
@@ -192,7 +205,6 @@ elseif(PLATFORM_MACOS)
         if (NOT CORE_VIDEO)
                 message(FATAL_ERROR "CoreVideo is not found")
         endif()
-        target_link_libraries(${TARGET_NAME} PRIVATE )
 
         find_library(METAL_FRAMEWORK Metal)
         if (NOT METAL_FRAMEWORK)
@@ -227,21 +239,32 @@ elseif(PLATFORM_IOS)
         set(APPLE_SOURCE
             ${NATIVE_APP_SOURCE_DIR}/Apple/Source/main.m
             ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/AppDelegate.m
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/BaseView.m
             ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/EAGLView.m
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/AppViewBase.m
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/ModeSelectionViewController.mm
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/MetalView.m
         )
+
         set_source_files_properties(${APPLE_SOURCE} PROPERTIES
             COMPILE_FLAGS "-x objective-c++"
         )
 
         set(APPLE_INCLUDE
             ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/AppDelegate.h
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/BaseView.h
             ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/EAGLView.h
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/AppViewBase.h
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/ModeSelectionViewController.h
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Source/Classes/iOS/MetalView.h
         )
 
         set(APPLE_RESOURCES
             ${NATIVE_APP_SOURCE_DIR}/Apple/Data/iOS/Base.lproj/Main.storyboard
             ${NATIVE_APP_SOURCE_DIR}/Apple/Data/iOS/Base.lproj/LaunchScreen.xib
             ${NATIVE_APP_SOURCE_DIR}/Apple/Data/iOS/Images.xcassets/AppIcon.appiconset/dg-icon.png
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Data/iOS/Images.xcassets/opengles-logo.png
+            ${NATIVE_APP_SOURCE_DIR}/Apple/Data/iOS/Images.xcassets/vulkan-logo.png
         )
 
         set(APPLE_INFO_PLIST
@@ -259,6 +282,7 @@ elseif(PLATFORM_IOS)
             RESOURCE "${APPLE_RESOURCES}"
             XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
             # XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "Dev Team"
+            BUILD_RPATH "@executable_path"
         )
         source_group("iOS" FILES ${APPLE_SOURCE})
         source_group("iOS" FILES ${APPLE_INCLUDE})
@@ -266,13 +290,13 @@ elseif(PLATFORM_IOS)
         target_include_directories(${TARGET_NAME} PRIVATE ${APPLE_INCLUDE_DIRS})
 
         find_library(OPENGLES OpenGLES)
-            if (NOT OPENGLES)
-                message(FATAL_ERROR "OpenGLES is not found")
-            endif()
+        if (NOT OPENGLES)
+            message(FATAL_ERROR "OpenGLES is not found")
+        endif()
 
         find_library(UIKIT UIKit)
         if (NOT UIKIT)
-                message(FATAL_ERROR "UIKIT is not found")
+            message(FATAL_ERROR "UIKIT is not found")
         endif()
 
         find_library(CORE_ANIMATION QuartzCore)
@@ -308,7 +332,7 @@ PUBLIC
 
 if(MSVC)
     target_compile_options(NativeAppBase PRIVATE -DUNICODE)
-    
+
     if(PLATFORM_UNIVERSAL_WINDOWS)
         # Disable w4189: local variable is initialized but not referenced
         # Disable w4063: case is not a valid value for switch of enum
@@ -319,8 +343,8 @@ endif()
 
 target_link_libraries(NativeAppBase 
 PRIVATE 
-    BuildSettings
-    Common
+    Diligent-BuildSettings
+    Diligent-Common
 )
 
 if(PLATFORM_WIN32)
@@ -331,7 +355,7 @@ if(PLATFORM_WIN32)
     )
 
 elseif(PLATFORM_UNIVERSAL_WINDOWS)
-    
+
     target_include_directories(NativeAppBase 
     PUBLIC 
         include/UWP 
@@ -339,7 +363,7 @@ elseif(PLATFORM_UNIVERSAL_WINDOWS)
     )
 
 elseif(PLATFORM_ANDROID)
-    target_link_libraries(NativeAppBase PUBLIC NDKHelper NativeAppGlue PRIVATE android)
+    target_link_libraries(NativeAppBase PUBLIC NDKHelper native_app_glue PRIVATE android)
     target_include_directories(NativeAppBase
     PUBLIC
         include/Android

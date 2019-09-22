@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,14 +20,5 @@
  *  all other commercial damages or losses), even if such Contributor has been advised 
  *  of the possibility of such damages.
  */
-
-#ifndef NOMINMAX
-#   define NOMINMAX
-#endif
-#include <Windows.h>
-
-#ifndef ENGINE_DLL 
-#   define ENGINE_DLL 1
-#endif
-
-#include "DiligentCore/Graphics/GraphicsEngineD3D12/interface/RenderDeviceFactoryD3D12.h"
+#include "DiligentCore/ThirdParty/vulkan/vulkan.h"
+#include "DiligentCore/Graphics/GraphicsEngineVulkan/interface/ShaderResourceBindingVk.h"

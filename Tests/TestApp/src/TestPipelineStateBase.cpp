@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ TestPipelineStateBase::TestPipelineStateBase(Diligent::IRenderDevice *pDevice, c
     UnitTestBase(Name),
     m_pDevice(pDevice)
 {
-    ShaderCreationAttribs Attrs;
+    ShaderCreateInfo Attrs;
     Attrs.Source = g_ShaderSource;
     Attrs.EntryPoint = "VSMain";
     Attrs.Desc.ShaderType = SHADER_TYPE_VERTEX;

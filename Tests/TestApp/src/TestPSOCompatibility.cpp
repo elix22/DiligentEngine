@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ RefCntAutoPtr<IPipelineState> TestPSOCompatibility::CreateTestPSO(const char *VS
     PSODesc.GraphicsPipeline.RTVFormats[0] = TEX_FORMAT_RGBA8_UNORM_SRGB;
     PSODesc.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
 
-    ShaderCreationAttribs CreationAttrs;
+    ShaderCreateInfo CreationAttrs;
     CreationAttrs.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
     CreationAttrs.UseCombinedTextureSamplers = true;
     RefCntAutoPtr<IShader> pVS;
@@ -235,7 +235,7 @@ RefCntAutoPtr<IPipelineState> TestPSOCompatibility::CreateTestPSO(const char *CS
 {
     PipelineStateDesc PSODesc;
     PSODesc.IsComputePipeline = true;
-    ShaderCreationAttribs CreationAttrs;
+    ShaderCreateInfo CreationAttrs;
     CreationAttrs.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
     CreationAttrs.UseCombinedTextureSamplers = true;
     RefCntAutoPtr<IShader> pCS;

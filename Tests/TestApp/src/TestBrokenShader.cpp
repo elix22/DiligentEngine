@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ void VSMain(out float4 pos : SV_POSITION)
 TestBrokenShader::TestBrokenShader(IRenderDevice *pDevice) : 
     UnitTestBase("Broken shader test")
 {
-    ShaderCreationAttribs Attrs;
+    ShaderCreateInfo Attrs;
     Attrs.Source = g_BrokenShaderSource;
     Attrs.EntryPoint = "VSMain";
     Attrs.Desc.ShaderType = SHADER_TYPE_VERTEX;

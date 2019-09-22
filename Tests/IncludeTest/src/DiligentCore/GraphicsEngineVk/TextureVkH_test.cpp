@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,5 +21,5 @@
  *  of the possibility of such damages.
  */
 
-#include <d3d11.h>
-#include "DiligentCore/Graphics/GraphicsEngineD3D11/interface/EngineD3D11Attribs.h"
+#include "DiligentCore/ThirdParty/vulkan/vulkan.h"
+#include "DiligentCore/Graphics/GraphicsEngineVulkan/interface/TextureVk.h"

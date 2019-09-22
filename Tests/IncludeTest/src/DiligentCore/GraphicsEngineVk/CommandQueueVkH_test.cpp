@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,6 +21,5 @@
  *  of the possibility of such damages.
  */
 
-#if D3D12_SUPPORTED
-#include "DiligentCore/Graphics/GraphicsTools/include/TextureUploaderD3D12.h"
-#endif
+#include "DiligentCore/ThirdParty/vulkan/vulkan.h"
+#include "DiligentCore/Graphics/GraphicsEngineVulkan/interface/BufferViewVk.h"

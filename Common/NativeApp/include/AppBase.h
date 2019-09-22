@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -37,6 +37,11 @@ public:
     virtual void Render()  = 0;
     virtual void Present() = 0;
     virtual void WindowResize(int width, int height) = 0;
+    virtual void GetDesiredInitialWindowSize(int& width, int& height)
+    {
+        width  = 0;
+        height = 0;
+    }
 };
 
 }

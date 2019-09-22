@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ UnityAppBase::~UnityAppBase()
 
 void UnityAppBase::ProcessCommandLine(const char *CmdLine)
 {
-    const auto* Key = "mode=";
-    const auto *pos = strstr(CmdLine, Key);
+    const auto* Key = "-mode ";
+    const auto* pos = strstr(CmdLine, Key);
     if (pos != nullptr)
     {
         pos += strlen(Key);

@@ -1,4 +1,4 @@
-/*     Copyright 2015-2019 Egor Yusov
+/*     Copyright 2019 Diligent Graphics LLC
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
 #include <math.h>
 #include "TestBufferAccess.h"
 #include "MapHelper.h"
-#include "BasicShaderSourceStreamFactory.h"
 
 using namespace Diligent;
 
@@ -86,25 +85,25 @@ void TestBufferAccess::Init( IRenderDevice *pDevice, IDeviceContext *pContext, I
         }
         else if( InstBuff == 4 )
         {
-            BuffDesc.Usage = USAGE_CPU_ACCESSIBLE;
+            BuffDesc.Usage = USAGE_STAGING;
             BuffDesc.BindFlags = BIND_NONE;
             BuffDesc.CPUAccessFlags = CPU_ACCESS_READ;
         }
         else if( InstBuff == 5 )
         {
-            BuffDesc.Usage = USAGE_CPU_ACCESSIBLE;
+            BuffDesc.Usage = USAGE_STAGING;
             BuffDesc.BindFlags = BIND_NONE;
             BuffDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
         }
         else if( InstBuff == 6 )
         {
-            BuffDesc.Usage = USAGE_CPU_ACCESSIBLE;
+            BuffDesc.Usage = USAGE_STAGING;
             BuffDesc.BindFlags = BIND_NONE;
             BuffDesc.CPUAccessFlags = CPU_ACCESS_READ;
         }
 
         Diligent::BufferData BuffData;
-        if(BuffDesc.Usage != USAGE_DYNAMIC && !(BuffDesc.Usage == USAGE_CPU_ACCESSIBLE && (BuffDesc.CPUAccessFlags & CPU_ACCESS_WRITE) != 0))
+        if(BuffDesc.Usage != USAGE_DYNAMIC && !(BuffDesc.Usage == USAGE_STAGING && (BuffDesc.CPUAccessFlags & CPU_ACCESS_WRITE) != 0))
         {
             BuffData.pData = instance_offsets;
             BuffData.DataSize = sizeof(instance_offsets);
@@ -112,9 +111,10 @@ void TestBufferAccess::Init( IRenderDevice *pDevice, IDeviceContext *pContext, I
         m_pRenderDevice->CreateBuffer(BuffDesc, &BuffData, &m_pInstBuff[InstBuff]);
     }
 
-    ShaderCreationAttribs CreationAttrs;
-    BasicShaderSourceStreamFactory BasicSSSFactory;
-    CreationAttrs.pShaderSourceStreamFactory = &BasicSSSFactory;
+    ShaderCreateInfo CreationAttrs;
+    RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
+    pDevice->GetEngineFactory()->CreateDefaultShaderSourceStreamFactory(nullptr, &pShaderSourceFactory);
+    CreationAttrs.pShaderSourceStreamFactory = pShaderSourceFactory;
     CreationAttrs.Desc.TargetProfile = bUseGLSL ? SHADER_PROFILE_GL_4_2 : SHADER_PROFILE_DX_5_0;
     CreationAttrs.UseCombinedTextureSamplers = true;
 
@@ -147,9 +147,9 @@ void TestBufferAccess::Init( IRenderDevice *pDevice, IDeviceContext *pContext, I
 
     LayoutElement Elems[] =
     {
-        LayoutElement{ 0, 1, 3, Diligent::VT_FLOAT32, false, 0 },
-        LayoutElement{ 1, 1, 3, Diligent::VT_FLOAT32, false, sizeof( float ) * 3, sizeof( float ) * 6   },
-        LayoutElement{ 2, 3, 2, Diligent::VT_FLOAT32, false, 0, 0, LayoutElement::FREQUENCY_PER_INSTANCE }
+        LayoutElement{ 1, 1, 3, Diligent::VT_FLOAT32, false, sizeof(float) * 3, sizeof(float) * 6 },
+        LayoutElement{ 0, 1, 3, Diligent::VT_FLOAT32, false,                 0, sizeof(float) * 6 },
+        LayoutElement{ 2, 3, 2, Diligent::VT_FLOAT32, false, LayoutElement::AutoOffset, LayoutElement::AutoStride, LayoutElement::FREQUENCY_PER_INSTANCE }
     };
     PSODesc.GraphicsPipeline.InputLayout.LayoutElements = Elems;
     PSODesc.GraphicsPipeline.InputLayout.NumElements = _countof( Elems );
@@ -168,7 +168,7 @@ void TestBufferAccess::Draw(float fTime)
     Uint32 Offsets[_countof( pBuffs )] = {0, 0, 0, 0, 0};
     m_pDeviceContext->SetVertexBuffers( 0, _countof( pBuffs ), pBuffs, Offsets, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET );
     
-    DrawAttribs DrawAttrs(3, DRAW_FLAG_VERIFY_STATES);
+    DrawAttribs DrawAttrs(3, DRAW_FLAG_VERIFY_ALL);
     DrawAttrs.NumVertices = 3;
     DrawAttrs.NumInstances = NumInstances;
     m_pDeviceContext->Draw(DrawAttrs);
