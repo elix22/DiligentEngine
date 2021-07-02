@@ -2,15 +2,23 @@ cmake_minimum_required (VERSION 3.6)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Generate XCode schema files
+set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
+# Make malloc write 0xAA to newly allocated memory and 0x55 to deallocated memory
+set(CMAKE_XCODE_SCHEME_MALLOC_SCRIBBLE YES)
+# Place guard pages on each side of large (4096 bytes or more) buffers
+set(CMAKE_XCODE_SCHEME_MALLOC_GUARD_EDGES YES)
+
 project(DiligentEngine)
 
 option(DILIGENT_BUILD_TOOLS "Build DiligentTools module" ON)
 option(DILIGENT_BUILD_FX "Build DiligentFX module" ON)
 option(DILIGENT_BUILD_SAMPLES "Build DiligentSamples module" ON)
-option(DILIGENT_BUILD_DEMOS "Build demo projects" ON)
-option(DILIGENT_BUILD_UNITY_PLUGIN "Build Unity plugin" ON)
 
 add_subdirectory(DiligentCore)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/DiligentCorePro")
+    add_subdirectory(DiligentCorePro)
+endif()
 
 if(${DILIGENT_BUILD_TOOLS})
     add_subdirectory(DiligentTools)
@@ -39,18 +47,14 @@ if(${DILIGENT_BUILD_SAMPLES})
     add_subdirectory(DiligentSamples)
 endif()
 
-if(${DILIGENT_BUILD_DEMOS})
-    add_subdirectory(Projects)
-endif()
-
-if(${DILIGENT_BUILD_UNITY_PLUGIN} AND (D3D11_SUPPORTED OR D3D12_SUPPORTED OR GL_SUPPORTED OR GLES_SUPPORTED))
-    add_subdirectory(unityplugin)
-endif()
-
 if(TARGET GLTFViewer)
     set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT GLTFViewer)
 elseif(TARGET Asteroids)
     set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Asteroids)
-elseif(TARGET AtmosphereSample)
-    set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT AtmosphereSample)
+elseif(TARGET Atmosphere)
+    set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Atmosphere)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/DiligentCommunity")
+    add_subdirectory(DiligentCommunity)
 endif()

@@ -1,9 +1,183 @@
+## v2.5
 
-## Current Progress
+### API Changes
+
+* Removed `RayTracing2` device feature and added `RAY_TRACING_CAP_FLAGS` enum (API Version 240099)
+* Added tile shaders (API Version 240098)
+  * Added `PIPELINE_TYPE_TILE` and `SHADER_TYPE_TILE` enum values
+  * Added `TileShaders` device feature
+  * Added `TilePipelineDesc`, `TilePipelineStateCreateInfo` and `DispatchTileAttribs` structs
+  * Added `IRenderDevice::CreateTilePipelineState`, `IPipelineState::GetTilePipelineDesc`,
+    `IDeviceContext::DispatchTile` and `IDeviceContext::GetTileSize` methods
+* Removed `GetNextFenceValue`, `GetCompletedFenceValue`, and `IsFenceSignaled` methods from `IRenderDeviceD3D12` and `IRenderDeviceVk` interfaces
+  as they are now in `ICommandQueue` interface (API Version 240097)
+* Added `ICommandQueue` interface, `IDeviceContext::LockCommandQueue` and `IDeviceContext::UnlockCommandQueue` methods,
+  removed fence query methods from `IRenderDeviceVk`, `IRenderDeviceD3D12`, and `IRenderDeviceMtl` (API Version 240096)
+* Added multiple immediate device contexts and refactored adapter queries (API Version 240095)
+  * `CommandQueueMask` member of `TextureDesc`, `BufferDesc`, `PipelineStateDesc`, `TopLevelASDesc`,
+    and `BottomLevelASDesc`, was renamed to `ImmediateContextMask`
+  * Added `pContext` member to `TextureData` and `BufferData` structs to indicate which context to
+    use for initialization.
+  * Removed `GetDeviceCaps` and `GetDeviceProperties` `IDeviceContext` methods and added
+   `GetDeviceInfo` and `GetAdapterInfo` methods; added `RenderDeviceInfo` struct.
+  * Renamed `SamplerCaps` to `SamplerProperties, `TextureCaps` to `TextureProperties`; added `BufferProperties`,
+    `RayTracingProperties`, and `MeshShaderProperties` structs
+  * Removed `DeviceLimits` struct
+  * Removed `DeviceCaps` struct and moved its members to `GraphicsAdapterInfo` and `RenderDeviceInfo` structs
+  * Added `NativeFence` to `DeviceFeatures`
+  * Added `CommandQueueInfo` struct
+  * Added `COMMAND_QUEUE_TYPE` and `QUEUE_PRIORITY` enums
+  * Renamed `ShaderVersion` struct to `Version`
+  * Reworked `GraphicsAdapterInfo` struct
+  * Added `ImmediateContextCreateInfo` struct and `pImmediateContextInfo`, `NumImmediateContexts` members to `EngineCreateInfo` struct
+  * Added `AdapterId` and `GraphicsAPIVersion` members to `EngineCreateInfo` struct
+  * Removed `DIRECT3D_FEATURE_LEVEL` enum
+  * Added `FENCE_TYPE` enum
+  * Renamed `IFence::Reset` to `IFence::Signal`; added `IFence::Wait` method
+  * Added `IEngineFactory::EnumerateAdapters` method
+  * Added `DeviceContextDesc` struct and `IDeviceContext::GetDesc` method
+  * Added `IDeviceContext::Begin` method, renamed `IDeviceContext::SignalFence` to `IDeviceContext::EnqueueSignal`
+* Added debug annotations `IDeviceContext::BeginDebugGroup`, `IDeviceContext::EndDebugGroup`,
+ `IDeviceContext::InsertDebugLabel` (API Version 240095)
+* Added `DefaultVariableMergeStages` member to `PipelineResourceLayoutDesc` struct (API240094)
+* Added `IShaderResourceVariable::SetBufferRange` and `IShaderResourceVariable::SetBufferOffset` methods,
+  added `DeviceLimits` struct (API240093)
+* Updated API to allow explicitly flushing/invlidating mapped buffer memory range :
+  added `MEMORY_PROPERTIES` enum, `IBuffer::GetMemoryProperties()`, `IBuffer::FlushMappedRange()`,
+  and `IBuffer::InvalidateMappedRange()` methods (API240092)
+* Added `IDeviceContext::SetUserData()` and `IDeviceContext::GetUserData()` methods (API240091)
+* Added `SHADER_VARIABLE_FLAGS` enum and `SHADER_VARIABLE_FLAGS Flags` member to ShaderResourceVariableDesc struct (API240090)
+* Reworked validation options (API240089)
+  * Added `VALIDATION_FLAGS` and `D3D12_VALIDATION_FLAGS` enums; renamed `D3D11_DEBUG_FLAGS` to `D3D11_VALIDATION_FLAGS`
+  * Added `VALIDATION_FLAGS ValidationFlags` and `bool EnableValidation` to `EngineCreateInfo`
+  * Added `D3D12_VALIDATION_FLAGS D3D12ValidationFlags` to `EngineD3D12CreateInfo`; removed `EnableDebugLayer`, `EnableGPUBasedValidation`,
+    `BreakOnError`, `BreakOnCorruption`
+  * Added `VALIDATION_LEVEL` enum and `SetValidationLevel()` create info structs' helper functions
+  * Removed `EngineGLCreateInfo::CreateDebugContext` member (it is replaced with `EnableValidation`)
+* Added `MtlThreadGroupSizeX`, `MtlThreadGroupSizeY`, and `MtlThreadGroupSizeZ` members to
+  `DispatchComputeAttribs` and `DispatchComputeIndirectAttribs` structs (API Version 240088)
+* Added InstanceDataStepRate device feature (API Version 240087)
+* Added WaveOp device feature (API Version 240086)
+* Added UpdateSBT command (API Version 240085)
+* Removed `EngineD3D12CreateInfo::NumCommandsToFlushCmdList` and `EngineVkCreateInfo::NumCommandsToFlushCmdBuffer` as flushing
+  the context based on the number of commands is unreasonable (API Version 240084)
+* Added pipeline resource signatures, enabled inline ray tracing, added indirect draw mesh command (API Version 240083)
+* Replaced `IDeviceContext::ExecuteCommandList()` with `IDeviceContext::ExecuteCommandLists()` method that takes
+  an array of command lists instead of one (API Version 240082)
+* Added `IDeviceObject::SetUserData()` and `IDeviceObject::GetUserData()` methods (API Version 240081)
+
+### Samples and Tutorials
+
+* Added [Tutorial22 - Hybrid Rendering](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Tutorials/Tutorial22_HybridRendering)
+
+
+## v2.4.g
+
+### API Changes
+
+* Enabled ray tracing (API Version 240080)
+* Added `IDeviceContext::GetFrameNumber` method (API Version 240079)
+* Added `ShaderResourceQueries` device feature and `EngineGLCreateInfo::ForceNonSeparablePrograms` parameter (API Version 240078)
+
+* Renamed `USAGE_STATIC` to `USAGE_IMMUTABLE` (API Version 240077)
+
+* Renamed static samplers into immutable samplers (API Version 240076)
+  * Renamed `StaticSamplerDesc` -> `ImmutableSamplerDesc`
+  * Renamed `PipelineResourceLayoutDesc::NumStaticSamplers` -> `PipelineResourceLayoutDesc::NumImmutableSamplers`
+  * Renamed `PipelineResourceLayoutDesc::StaticSamplers` -> `PipelineResourceLayoutDesc::ImmutableSamplers`
+
+* Refactored pipeline state creation (API Version 240075)
+  * Replaced `PipelineStateCreateInfo` with `GraphicsPipelineStateCreateInfo` and `ComputePipelineStateCreateInfo`
+  * Replaced `IRenderDevice::CreatePipelineState` with `IRenderDevice::CreateGraphicsPipelineState` and `IRenderDevice::CreateComputePipelineState`
+  * `pVS`, `pGS`, `pHS`, `pDS`, `pPS`, `pAS`, `pMS` were moved from `GraphicsPipelineDesc` to `GraphicsPipelineStateCreateInfo`
+  * `GraphicsPipelineDesc GraphicsPipeline`  was moved from `PipelineStateDesc` to `GraphicsPipelineStateCreateInfo`
+  * `pCS` is now a member of `ComputePipelineStateCreateInfo`, `ComputePipelineDesc` was removed
+  * Added `IPipelineState::GetGraphicsPipelineDesc` method
+  
+  Old API for graphics pipeline initialization:
+  ```cpp
+  PipelineStateCreateInfo PSOCreateInfo;
+  PipelineStateDesc&      PSODesc = PSOCreateInfo.PSODesc;
+
+  PSODesc.GraphicsPipeline.pVS = pVS;
+  PSODesc.GraphicsPipeline.pPS = pVS;
+  // ...
+  Device->CreatePipelineState(PSOCreateInfo, &pPSO);
+  ```
+
+  New API for graphics pipeline initialization:
+  ```cpp
+  GraphicsPipelineStateCreateInfo PSOCreateInfo;
+  // ...
+  PSOCreateInfo.pVS = pVS;
+  PSOCreateInfo.pPS = pVS;
+  Device->CreateGraphicsPipelineState(PSOCreateInfo, &pPSO);
+  ```
+
+  Old API for compute pipeline initialization:
+  ```cpp
+  PipelineStateCreateInfo PSOCreateInfo;
+  PipelineStateDesc&      PSODesc = PSOCreateInfo.PSODesc;
+
+  PSODesc.ComputePipeline.pCS = pCS;
+  // ...
+  Device->CreatePipelineState(PSOCreateInfo, &pPSO);
+  ```
+
+    New API for compute pipeline initialization:
+  ```cpp
+  ComputePipelineStateCreateInfo PSOCreateInfo;
+
+  PSOCreateInfo.pCS = pCS;
+  Device->CreateComputePipelineState(PSOCreateInfo, &pPSO);
+  ```
+
+* Added `ShaderInt8`, `ResourceBuffer8BitAccess`, and `UniformBuffer8BitAccess` device features. (API Version 240074)
+* Added `ShaderFloat16`, `ResourceBuffer16BitAccess`, `UniformBuffer16BitAccess`, and `ShaderInputOutput16` device features. (API Version 240073)
+
+
+### Samples and Tutorials
+
+* Added [Tutorial21 - Ray Tracing](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Tutorials/Tutorial21_RayTracing)
+
+
+## v2.4.f
+
+### API Changes
+
+* Added `UnifiedMemoryCPUAccess` member to `GraphicsAdapterInfo` struct (API Version 240072)
+   * An application should check allowed unified memory access types before creating unified buffers
+* Added GPU vendor and memory size detection (API Version 240071)
+   * Added `ADAPTER_VENDOR` enum
+   * Added `GraphicsAdapterInfo` struct
+   * Added `GraphicsAdapterInfo AdapterInfo` member to `DeviceCaps` struct
+   * Removed `ADAPTER_TYPE AdaterType` from `DeviceCaps` struct 
+* Reworked texture format properties (API Version 240070)
+   * Added `RESOURCE_DIMENSION_SUPPORT` enum
+   * Reworked `TextureFormatInfoExt` struct
+* Added option to disable/enable device features during initialization (API Version 240069)
+   * Added `DEVICE_FEATURE_STATE` enum
+   * Changed the types of members of `DeviceFeatures` struct from bool to `DEVICE_FEATURE_STATE`
+   * Added `DeviceFeatures Features` member to `EngineCreateInfo` struct
+* Enabled mesh shaders (API Version 240068)
+   * Added `PIPELINE_TYPE` enum
+   * Replaced `IsComputePipline` member of `PipelineStateDesc` struct with `PIPELINE_TYPE PipelineType`
+   * Added new mesh shader types
+   * Added mesh shader draw commands
+* Added `QUERY_TYPE_DURATION` query type (API Version 240067)
+* Added `USAGE_UNIFIED` usage type (API Version 240066)
+* Added render passes (API Version 240065)
+* Added `CREATE_SHADER_SOURCE_INPUT_STREAM_FLAGS` enum and `IShaderSourceInputStreamFactory::CreateInputStream2` method (API Version 240064)
+* Added `ISwapChain::SetMaximumFrameLatency` function (API Version 240061)
+* Added `EngineGLCreateInfo::CreateDebugContext` member (API Version 240060)
+* Added `SHADER_SOURCE_LANGUAGE_GLSL_VERBATIM` value (API Version 240059).
+* Added `GLBindTarget` parameter to `IRenderDeviceGL::CreateTextureFromGLHandle` method (API Version 240058).
 
 ### Samples and Tutorials
 
 * Added [HelloAR Android sample](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Android/HelloAR)
+* Added [Tutorial19 - Render Passes](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Tutorials/Tutorial19_RenderPasses)
+* Added [Tutorial20 - Mesh Shader](https://github.com/DiligentGraphics/DiligentSamples/tree/master/Tutorials/Tutorial20_MeshShader)
 
 
 ## v2.4.e
@@ -285,11 +459,11 @@ Core:
   * Moved `ITextureView::GenerateMips()` to `IDeviceContext::GenerateMips()`
   * Added state transition mode parameters to `IDeviceContext::UpdateBuffer()`, `IDeviceContext::UpdateTexture()`,
     `IDeviceContext::CopyBuffer()`, `IDeviceContext::CopyTexture()`, `IDeviceContext::SetVertexBuffers()`, 
-	`IDeviceContext::SetIndexBuffers()`, `IDeviceContext::ClearRenderTargets()`, and `IDeviceContext::ClearDepthStencil()` methods
+    `IDeviceContext::SetIndexBuffers()`, `IDeviceContext::ClearRenderTargets()`, and `IDeviceContext::ClearDepthStencil()` methods
   * Replaced `COMMIT_SHADER_RESOURCES_FLAGS` enum with `RESOURCE_STATE_TRANSITION_MODE`
   * Added `ITextureD3D12::GetD3D12ResourceState()`, `IBufferD3D12::GetD3D12ResourceState()`,
-	`IBufferVk::GetAccessFlags()`, and `ITextureVk::GetLayout()` methods
-  * Added `CopyTextureAttribs` structure that combines all paramters of `IDeviceContext::CopyTexture()` method
+    `IBufferVk::GetAccessFlags()`, and `ITextureVk::GetLayout()` methods
+  * Added `CopyTextureAttribs` structure that combines all parameters of `IDeviceContext::CopyTexture()` method
 
 ## v2.3.b
 
@@ -301,8 +475,8 @@ Core:
       * When separate samplers are used (`UseCombinedTextureSamplers == false`), samplers are set in the same way as other shader variables
         via shader or SRB objects
     * Removed `BIND_SHADER_RESOURCES_RESET_BINDINGS` flag, renamed `BIND_SHADER_RESOURCES_KEEP_EXISTING` to `BIND_SHADER_RESOURCES_KEEP_EXISTING`.
-	  Added `BIND_SHADER_RESOURCES_UPDATE_STATIC`, `BIND_SHADER_RESOURCES_UPDATE_MUTABLE`, `BIND_SHADER_RESOURCES_UPDATE_DYNAMIC`, and
-	  `BIND_SHADER_RESOURCES_UPDATE_ALL` flags
+      Added `BIND_SHADER_RESOURCES_UPDATE_STATIC`, `BIND_SHADER_RESOURCES_UPDATE_MUTABLE`, `BIND_SHADER_RESOURCES_UPDATE_DYNAMIC`, and
+      `BIND_SHADER_RESOURCES_UPDATE_ALL` flags
   * Using glslang to compile HLSL to SPIRV in Vulkan backend instead of relying on HLSL->GLSL converter
 
 
@@ -328,9 +502,9 @@ Core:
   * API Changes
     * Added `NumViewports` member to `GraphicsPipelineDesc` struct
     * Removed `PRIMITIVE_TOPOLOGY_TYPE` type
-	* Replaced `PRIMITIVE_TOPOLOGY_TYPE GraphicsPipelineDesc::PrimitiveTopologyType` 
+    * Replaced `PRIMITIVE_TOPOLOGY_TYPE GraphicsPipelineDesc::PrimitiveTopologyType` 
       with `PRIMITIVE_TOPOLOGY GraphicsPipelineDesc::PrimitiveTopology`
-	* Removed `DrawAttribs::Topology`
+    * Removed `DrawAttribs::Topology`
     * Removed `pStrides` parameter from `IDeviceContext::SetVertexBuffers()`. Strides are now defined
       through vertex layout.
 * API Changes:
